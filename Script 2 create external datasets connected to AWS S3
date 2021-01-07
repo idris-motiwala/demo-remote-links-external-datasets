@@ -1,0 +1,42 @@
+CREATE LINK mydemoS3link TYPE S3 WITH {
+    "accessKeyId":"<<your accessKeyId>>",
+    "secretAccessKey":"<<your secretAccessKey>>",
+    "region":"us-east-2"
+};
+
+CREATE EXTERNAL DATASET S3orders
+ON `cb-analytics-6.6-demo`
+AT mydemoS3link
+USING "eCommerce/archives"
+WITH { "format": "json" };
+
+
+CREATE EXTERNAL DATASET S3productreviews(
+    _id STRING NOT UNKNOWN, 
+    docType STRING NOT UNKNOWN,
+    reviewId STRING NOT UNKNOWN,
+    productId BIGINT,
+    userId BIGINT,
+    reviewerName STRING NOT UNKNOWN,
+    reviewerEmail STRING NOT UNKNOWN,
+    rating BIGINT,
+    title STRING NOT UNKNOWN,
+    review STRING NOT UNKNOWN,
+    reviewDate BIGINT
+  ) 
+ON `cb-analytics-6.6-demo`
+AT mydemoS3link
+USING "eCommerce/reviews"
+WITH { "format": "csv", "include": "*.csv", "header": false };
+
+-- Query Metadata Link
+select value lnk
+from Metadata.`Link` lnk
+order by lnk.DataverseName, lnk.Name;
+
+-- Sample query to get Review data from S3 and Product data from CB Analytics dataset
+SELECT pr.displayName Product, s3.review Review
+FROM   S3productreviews s3, 
+       products pr
+WHERE  s3.productId = pr.productId
+LIMIT  3;
