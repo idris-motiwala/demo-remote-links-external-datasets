@@ -40,3 +40,21 @@ FROM   S3productreviews s3,
        products pr
 WHERE  s3.productId = pr.productId
 LIMIT  3;
+
+WITH PreferredCustomers AS
+(
+    SELECT count(*), AVG(rating) AS avgrating, userId
+    FROM S3productreviews
+    GROUP BY userId
+    HAVING count(*) > 9
+    ORDER BY avgrating DESC
+    LIMIT 100
+)
+SELECT round(sum(uso.grandTotal), 2) AS totalOrders, user.firstName || ' ' || user.lastName AS name
+FROM USorders AS uso, users AS user, PreferredCustomers AS pc
+WHERE pc.userId = uso.userId
+  AND pc.userId = user.userId
+GROUP BY user.firstName || ' ' || user.lastName
+ORDER BY totalOrders DESC
+LIMIT 10
+;
