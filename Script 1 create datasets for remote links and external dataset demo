@@ -26,6 +26,11 @@ WHERE docType = 'Product';
 CREATE DATASET country ON `countrycontinent`
 AT remotelinkUSorders;
 
+-- Create Country Continent Master DATASET
+CREATE DATASET user ON `ecommerce2020`
+AT remotelinkUSorders
+WHERE docType = ‘User’;
+
 CONNECT Link remotelinkUSorders;
 
 SELECT  value lnk
